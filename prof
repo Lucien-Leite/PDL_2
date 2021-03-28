@@ -1,0 +1,34 @@
+<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2</artifactId>
+			<version>5.9.2</version>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-algorithm</artifactId>
+			<version>0.11.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.scif</groupId>
+			<artifactId>scifio</artifactId>
+			<version>0.41.0</version>
+		</dependency>
+
+
+
+// Convert from imglib2 to BufferedImage
+        final ARGBScreenImage screenImage = new ARGBScreenImage((int) image.dimension(0), (int) image.dimension(1));
+        final CompositeXYProjector<UnsignedByteType> projector = new CompositeXYProjector<>(image, screenImage, ChannelARGBConverter.converterListRGBA, 2);
+        projector.setComposite(true);
+        projector.map();
+        final BufferedImage bi = screenImage.image();
+
+        Il faut ensuite passer par javax.imageio.ImageIO pour écrire la réponse dans le format souhaité :
+
+ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+ImageIO.write(bufferedImage , "jpg", byteArrayOutputStream);
+byte[] imageInByte = baos.toByteArray();
+return ResponseEntity.status(HttpStatus.OK)
+            .header(HttpHeaders.CONTENT_DISPOSITION, "filename=\"image.jpg"\")
+            .contentType(MediaType.IMAGE_JPEG)
+            .body(imageInByte);
